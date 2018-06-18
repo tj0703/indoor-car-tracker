@@ -1,0 +1,70 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<canvas id="myCanvas" width="400" height="200" style="border:1px solid #d3d3d3;">
+Your browser does not support the HTML5 canvas tag.</canvas>
+<script type="text/javascript">
+    window.addEventListener("load", function() {
+        // create websocket instance
+        var mySocket = new WebSocket("ws://localhost:8080/ws");
+        // add event listener reacting when message is received
+        mySocket.onmessage = function(event) {
+	      console.log(JSON.parse(event.data));
+// parse the received JSON
+              var jsonObj = JSON.parse(event.data);
+              var x = jsonObj.xpos;
+              var y = jsonObj.ypos;
+// display the xpos and ypos on list
+	      var ul1 = document.getElementById("dynamic-list-x");
+              var ul2 = document.getElementById("dynamic-list-y");
+              var li1 = document.createElement("li");
+	      var li2 = document.createElement("li");
+              li1.setAttribute('id',x);
+              li2.setAttribute('id',y);
+              li1.appendChild(document.createTextNode(x));
+              ul1.appendChild(li1);
+              li2.appendChild(document.createTextNode(y));
+              ul2.appendChild(li2);
+// draw the path on CANVAS
+              var c = document.getElementById("myCanvas");
+              var ctx = c.getContext("2d");
+              ctx.beginPath();
+              ctx.arc(x,y,4,0,2*Math.PI);
+              ctx.stroke(); 
+        };
+        var form = document.getElementsByClassName("foo");
+        form[0].addEventListener("submit", function (e) {
+            // on forms submission send input to our server
+        var msg = {
+            xpos: document.getElementById("xpos").value,
+            ypos: document.getElementById("ypos").value,  
+            };
+            mySocket.send(JSON.stringify(msg));
+//emptying the input fields
+            document.getElementById("xpos").value = "";
+            document.getElementById("ypos").value = "";
+            e.preventDefault()
+        })
+    });
+</script>
+<style>
+    /* just some super ugly css to make things bit more readable*/
+    div {
+        margin: 10em;
+    }
+    form {
+        margin: 10em;
+    }
+</style>
+</head>
+<body>
+    <form class="foo">
+        <input id="xpos"></input>
+        <input id="ypos"></input>
+        <input type="submit"></input>
+    </form>
+    <ul id="dynamic-list-x"></ul>
+    <ul id="dynamic-list-y"></ul>    
+</body>
+</html>
